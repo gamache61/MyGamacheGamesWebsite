@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gamache Games</title>
+<style>
+body{background:#0d0f14;color:#eef1f7;font-family:system-ui,sans-serif;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:20px}
+.card{background:#1a1f2b;border:1px solid #2a3142;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-size:28px}
+.btn{padding:8px 14px;border-radius:10px;border:1px solid #2a3142;background:#151923;color:#eef1f7;font-weight:700;cursor:pointer;display:inline-flex;text-decoration:none;align-items:center;gap:6px}
+.btn.primary{background:#ffb627;color:#111;border-color:#ffb627} .btn.buy{background:#3ddc97;color:#06281a;border-color:#3ddc97}
+.cat-bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.cat-chip{padding:6px 14px;border-radius:99px;border:1px solid #2a3142;background:#1a1f2b;color:#9aa3b5;cursor:pointer;font-weight:600;font-size:.85rem}
+.cat-chip.active{background:#ffb627;color:#111}
+.cat-chip,.badge{font-family:inherit;font-kerning:none;font-feature-settings:"kern" 0;letter-spacing:.03em}
+.search-box{display:flex;gap:8px;margin:12px 0}
+.search-box input{flex:1;min-width:200px;background:#1a1f2b;border:1px solid #2a3142;color:#eef1f7;border-radius:10px;padding:10px 14px}
+.badge{display:inline-flex;padding:3px 8px;border-radius:99px;font-size:.7rem;font-weight:700;background:#ffb62722;color:#ffb627;border:1px solid #ffb62744;text-transform:uppercase}
+.demo-modal{position:fixed;inset:0;z-index:100;display:none} .demo-modal.show{display:block} .d-back{position:absolute;inset:0;background:rgba(0,0,0,.85)} .d-box{position:relative;max-width:1100px;margin:3vh auto;background:#0d0f14;border:1px solid #2a3142;border-radius:16px;height:94vh;display:flex;flex-direction:column} .d-head{display:flex;justify-content:space-between;padding:12px 16px;background:#151923;border-bottom:1px solid #2a3142} .timer{background:#ffb627;color:#111;padding:4px 12px;border-radius:99px;font-weight:700} iframe{flex:1;border:0;background:#000} .paywall{position:absolute;inset:56px 0 0;background:rgba(13,15,20,.97);display:none;place-items:center;padding:24px;text-align:center} .paywall.show{display:grid} .paywall-card{background:#151923;border:1px solid #2a3142;border-radius:16px;padding:28px;max-width:440px}
+.gear{display:none;background:#ffb627;border:2px solid #ffb627;color:#111;padding:12px 20px;border-radius:10px;cursor:pointer;font-weight:800;font-size:1rem} body.can-edit .gear{display:inline-block} body.admin .shade{display:block} body.admin .drawer{transform:none} .shade{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:40;display:none} .drawer{position:fixed;top:0;right:0;height:100%;width:min(680px,100%);background:#151923;border-left:2px solid #ffb627;z-index:50;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column} .dr-head{display:flex;justify-content:space-between;padding:16px;border-bottom:1px solid #2a3142;align-items:center} .dr-body{overflow:auto;padding:16px;flex:1} .dr-foot{padding:16px;border-top:1px solid #2a3142;display:flex;gap:8px;flex-wrap:wrap} .lock-gear{background:none;border:none;color:#4b5263;font-size:1.3rem;cursor:pointer;margin-left:8px;opacity:.6} .site-foot{text-align:center;padding:30px 16px 20px;color:#4b5263;font-size:.8rem}
+</style></head><body>
+<div class="wrap" style="padding:24px 16px"><div><h1 style="font-size:2.1rem;margin:0">Gamache Games</h1><p style="color:#9aa3b5;margin:6px 0 0">Games by Gamache — Try World Builder and more games. Play the free 1-min demo. For educational use.</p></div><div style="display:flex;justify-content:flex-end;margin:12px 0"><button class="gear" onclick="openAdmin()">⚙ Edit Apps &amp; Categories</button></div><div id="siteNote" style="display:none;white-space:pre-wrap;color:#eef1f7;line-height:1.5;margin:14px 0 4px"></div><div id="catBar" class="cat-bar"></div><div class="grid" id="grid"></div></div><footer class="site-foot">© Gamache Games<button class="lock-gear" id="lockGear" onclick="askPassword()" title="Lock editor">🔓</button><div id="visitStats" style="display:none;margin-top:10px;color:#ffb627;font-weight:700;font-size:.9rem"></div></footer>
+<div class="shade" id="shade" onclick="closeAdmin()"></div>
+<aside class="drawer" id="drawer"><div class="dr-head"><div><h2 style="margin:0">Edit Everything</h2><small style="color:#9aa3b5">Title, Desc, Icon, Demo, Buy, Price, Color, <b style="color:#ffb627">Category</b></small></div><button onclick="closeAdmin()" style="background:none;border:none;color:#9aa3b5;font-size:2rem;cursor:pointer">×</button></div><div class="dr-body"><div style="display:flex;gap:8px;margin-bottom:14px"><button class="btn primary" onclick="addApp()" style="flex:1">➕ Add New App</button><button class="btn" onclick="duplicateLastApp()">📋 Duplicate Last</button></div><div id="editor"></div></div><div class="dr-foot"><button class="btn primary" id="saveAll" style="flex:1">💾 Save All Changes</button><button class="btn" id="exportBtn">⬇ Download index.html</button><button class="btn" onclick="if(confirm('Reset all?')){localStorage.removeItem('gg-all-fields-v3'); location.reload();}">Reset</button></div></aside>
+<div class="demo-modal" id="demoModal"><div class="d-back" onclick="closeDemo()"></div><div class="d-box"><div class="d-head"><strong id="dTitle">Demo</strong><div style="display:flex;gap:10px;align-items:center"><span class="timer" id="dTimer">01:00</span><button class="btn" onclick="closeDemo()">✕</button></div></div><iframe id="dFrame" src="about:blank"></iframe><div class="paywall" id="dPaywall"><div class="paywall-card"><div style="font-size:48px">⏱</div><h3>Demo Over - 1 Minute</h3><p style="color:#9aa3b5;margin:12px 0">Buy full version for unlimited.</p><a id="dBuyLink" class="btn buy" target="_blank" href="#">Buy Full Version</a><button class="btn" onclick="replayDemo()" style="margin-left:8px">Replay Demo</button></div></div></div></div><script>
+const defaultApps = [
+  {"id": "worldbuilder", "title": "World Builder", "desc": "Build and unlock Chapters 1-5. Start with Chapter 1: The Seeker. Demo 1 min, buy full version for unlimited with your unlock key.", "icon": "\ud83c\udfd7", "play": "https://gamache61.github.io/MyWorldBuilderGame/", "buy": "https://buy.stripe.com/3cIdR9gM36f40EK2YhbZe0P", "price": "4.89", "color": "#3ddc97", "category": "word builder"},
+  {"id": "app_1793152832284", "title": "Rocket To Mars", "desc": "Rocket To Mars is a game where you roll the dice and land on a rocket part to buy and build a rocket for the winner to fly to mars.", "icon": "\ud83c\udd95", "play": "https://gamache61.github.io/MyRocketToMarsGame/", "buy": "https://buy.stripe.com/28EeVdfHZ8nc4V0dCVbZe0z", "price": "4.89", "color": "#ffb627", "category": "games"},
+  {"id": "app_1793153806256", "title": "Scene Secure", "desc": "Scene secure is a game of jail break and the search for suspect in the city with one man leading the search.", "icon": "\ud83c\udd95", "play": "https://gamache61.github.io/MySceneSecureGame", "buy": "https://buy.stripe.com/fZudR99jBavkdrwdCVbZe0A", "price": "4.89", "color": "#ffb627", "category": "games"},
+  {"id": "app_1793153970665", "title": "Back To Battle", "desc": "Back To Battle is a board game where you can play against other people or the computer in a battle against different countries.", "icon": "\ud83c\udd95", "play": "https://gamache61.github.io/MyBackToBattleGame/", "buy": "https://buy.stripe.com/aFa6oHcvN7j80EKbuNbZe0B", "price": "4.89", "color": "#ffb627", "category": "games"},
+  {"id": "app_1793154504289", "title": "Audio Equalizer", "desc": "Audio Equalizer enhances your music experience and allow you to store your songs on the app.", "icon": "\ud83c\udd95", "play": "https://gamache61.github.io/MyAudioEqApp/", "buy": "https://buy.stripe.com/00wcN5anFdHw87cdCVbZe0E", "price": "4.89", "color": "#ffb627", "category": "music"},
+  {"id": "app_1793232579287", "title": "Fighter Craft", "desc": "This is a star ship fighting against alien attackers far in space.", "icon": "\ud83c\udd95", "play": "https://gamache61.github.io/MyFightercraftGame/", "buy": "https://buy.stripe.com/eVqfZh1R9dHwfzEeGZbZe0y", "price": "4.89", "color": "#ffb627", "category": "games"}
+]
+
+const defaultSite = {"note":"","catColors":{}};
+
+let apps = JSON.parse(JSON.stringify(defaultApps));
+let site = JSON.parse(JSON.stringify(defaultSite));
+let activeCategory='';
+function catKey(c){ return (String(c==null?'':c).trim()||'games').toLowerCase(); }
+function catList(){ const m=new Map(); apps.forEach(a=>{ const k=catKey(a.category); if(!m.has(k)) m.set(k,{key:k,name:String(a.category==null?'':a.category).trim()||'games',count:0}); m.get(k).count++; }); const ord=Array.isArray(site.catOrder)?site.catOrder:[]; const pos=k=>{ const i=ord.indexOf(k); return i<0?1e9:i; }; return [...m.values()].sort((x,y)=>(pos(x.key)-pos(y.key))||(x.key<y.key?-1:(x.key>y.key?1:0))); }
+function catColor(k){ const c=site.catColors&&site.catColors[k]; return /^#[0-9a-f]{6}$/i.test(c||'')?c:'#ffb627'; }
+function textOn(hex){ const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (r*299+g*587+b*114)/1000>140?'#111':'#fff'; }
+function badgeHTML(a){ const col=catColor(catKey(a.category)); return '<span class="badge" style="color:'+col+';background:'+col+'22;border-color:'+col+'44;text-transform:none">'+esc(String(a.category==null?'':a.category).trim()||'games')+'</span>'; }
+function catOptions(a){ const k=catKey(a.category); return catList().map(c=>'<option value="'+esc(c.name)+'"'+(c.key===k?' selected':'')+'>'+esc(c.name)+'</option>').join('')+'<option value="__new__">\u2795 New category...</option>'; }
+function renderNote(){ const n=document.getElementById('siteNote'); if(!n) return; const t=String(site.note||'').trim(); n.textContent=t; n.style.display=t?'block':'none'; }
+function siteEditorHTML(){ const inp='background:#0d0f14;border:1px solid #2a3142;color:#eef1f7;border-radius:8px;padding:8px'; return '<div style="border:2px solid #2a3142;border-radius:12px;padding:12px;margin-bottom:14px;background:#1a1f2b"><label style="display:flex;flex-direction:column;gap:3px;color:#ffb627;font-size:.8rem;font-weight:700;margin-bottom:12px">TEXT ABOVE THE APPS (leave empty to show nothing)<textarea data-site="note" style="'+inp+';height:70px">'+esc(site.note)+'</textarea></label><div style="color:#ffb627;font-size:.8rem;font-weight:700;margin-bottom:6px">CATEGORIES (name + color &mdash; arrows move them, top one shows first)</div>'+catList().map(c=>'<div style="display:flex;gap:8px;margin-bottom:6px"><button type="button" class="btn" data-catmove="-1" data-catkey="'+esc(c.key)+'" style="padding:4px 10px" title="Move up">\u25B2</button><button type="button" class="btn" data-catmove="1" data-catkey="'+esc(c.key)+'" style="padding:4px 10px" title="Move down">\u25BC</button><input data-catname="'+esc(c.key)+'" value="'+esc(c.name)+'" style="flex:1;'+inp+'"><input type="color" data-catcolor="'+esc(c.key)+'" value="'+catColor(c.key)+'" style="width:60px;height:36px"></div>').join('')+'</div>'; }
+function setCategory(c){ activeCategory=c; renderCatBar(); renderGrid(); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderEditor(){ document.getElementById('editor').innerHTML = siteEditorHTML() + apps.map(a=>'<div style="border:2px solid '+a.color+';border-radius:12px;padding:12px;margin-bottom:14px;background:#1a1f2b"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:28px">'+a.icon+'</span><b style="flex:1">'+a.title+'</b>'+badgeHTML(a)+'<button class="btn" onclick="deleteApp(\''+a.id+'\')" style="padding:4px 8px">🗑</button></div><label style="display:flex;flex-direction:column;gap:3px;color:#9aa3b5;font-size:.8rem;margin-bottom:8px">TITLE<input data-field="title" data-id="'+a.id+'" value="'+esc(a.title)+'" style="background:#0d0f14;border:1px solid #2a3142;color:#eef1f7;border-radius:8px;padding:8px"></label><label style="display:flex;flex-direction:column;gap:3px;color:#9aa3b5;font-size:.8rem;margin-bottom:8px">DESCRIPTION<textarea data-field="desc" data-id="'+a.id+'" style="background:#0d0f14;border:1px solid #2a3142;color:#eef1f7;border-radius:8px;padding:8px;height:60px">'+esc(a.desc)+'</textarea></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label style="display:flex;flex-direction:column;gap:3px;color:#9aa3b5;font-size:.8rem">ICON<input data-field="icon" data-id="'+a.id+'" value="'+esc(a.icon)+'" style="background:#0d0f14;border:1px solid #2a3142;color:#eef1f7;border-radius:8px;padding:8px"></label><label style="display:flex;flex-direction:column;gap:3px;color:#ffb627;font-size:.8rem;font-weight:700">CATEGORY<select data-field="category" data-id="'+a.id+'" style="background:#0d0f14;border:2px solid #ffb627;color:#eef1f7;border-radius:8px;padding:8px">'+catOptions(a)+'</select></label></div><label style="display:flex;flex-direction:column;gap:3px;color:#ffb627;font-size:.8rem;margin-top:8px;font-weight:700">DEMO LINK<input data-field="play" data-id="'+a.id+'" value="'+esc(a.play)+'" style="background:#0d0f14;border:2px solid #ffb627;color:#eef1f7;border-radius:8px;padding:8px"></label><label style="display:flex;flex-direction:column;gap:3px;color:#3ddc97;font-size:.8rem;margin-top:8px;font-weight:700">BUY LINK<input data-field="buy" data-id="'+a.id+'" value="'+esc(a.buy)+'" style="background:#0d0f14;border:2px solid #3ddc97;color:#eef1f7;border-radius:8px;padding:8px"></label><div style="display:flex;gap:8px;margin-top:8px"><label style="flex:1;display:flex;flex-direction:column;gap:3px;color:#9aa3b5;font-size:.8rem">PRICE $<input data-field="price" data-id="'+a.id+'" value="'+esc(a.price)+'" style="background:#0d0f14;border:1px solid #2a3142;color:#eef1f7;border-radius:8px;padding:8px"></label><label style="display:flex;flex-direction:column;gap:3px;color:#9aa3b5;font-size:.8rem">COLOR<input type="color" data-field="color" data-id="'+a.id+'" value="'+a.color+'" style="width:60px;height:36px"></label></div></div>').join(''); }
+function readInputs(){ document.querySelectorAll('[data-field]').forEach(inp=>{ const id=inp.getAttribute('data-id'); const field=inp.getAttribute('data-field'); const idx=apps.findIndex(x=>x.id===id); if(idx<0) return; let v=inp.value.trim(); if(v==='__new__') return; apps[idx][field]=v; }); const sn=document.querySelector('[data-site="note"]'); if(sn) site.note=sn.value.trim(); if(!site.catColors) site.catColors={}; document.querySelectorAll('[data-catcolor]').forEach(inp=>{ site.catColors[inp.getAttribute('data-catcolor')]=inp.value; }); }
+function saveLocal(){ try{ localStorage.setItem('gg-all-fields-v3', JSON.stringify({base:JSON.stringify(defaultApps)+JSON.stringify(defaultSite), apps:apps, site:site})); }catch(e){} }
+function addApp(){ readInputs(); const id='app_'+Date.now(); apps.push({id:id,title:"New App "+(apps.length+1),desc:"Describe what this app teaches. For educational use.",icon:"🆕",play:"https://gamache61.github.io/",buy:"",price:"4.89",color:"#ffb627",category:(catList().find(c=>c.key===activeCategory)||{name:'games'}).name}); saveLocal(); renderCatBar(); renderGrid(); renderEditor(); }
+function duplicateLastApp(){ readInputs(); if(!apps.length) return addApp(); const last=apps[apps.length-1]; apps.push({...last,id:'app_'+Date.now(),title:last.title+" Copy"}); saveLocal(); renderCatBar(); renderGrid(); renderEditor(); }
+function deleteApp(id){ readInputs(); if(!confirm('Delete this app?')) return; apps=apps.filter(a=>a.id!==id); saveLocal(); renderCatBar(); renderGrid(); renderEditor(); }
+function openAdmin(){ if(!document.body.classList.contains('can-edit')) return; document.body.classList.add('admin'); }
+function closeAdmin(){ if(document.querySelector('#editor [data-field]')){ readInputs(); saveLocal(); renderCatBar(); renderGrid(); } document.body.classList.remove('admin'); }
+document.getElementById('editor').addEventListener('input', ()=>{ readInputs(); saveLocal(); });
+document.getElementById('editor').addEventListener('change', (e)=>{ readInputs(); const t=e.target; let re=false; if(t&&t.getAttribute&&t.getAttribute('data-catname')!==null){ const k=t.getAttribute('data-catname'); const nv=t.value.trim(); if(nv){ const ordBefore=catList().map(c=>c.key); apps.forEach(a=>{ if(catKey(a.category)===k) a.category=nv; }); const nk=catKey(nv); if(nk!==k){ site.catOrder=[...new Set(ordBefore.map(x=>x===k?nk:x))]; if(site.catColors[k]){ site.catColors[nk]=site.catColors[k]; delete site.catColors[k]; } if(activeCategory===k) activeCategory=nk; } } re=true; } if(t&&t.getAttribute&&t.getAttribute('data-field')==='category'){ if(t.value==='__new__'){ const nv=(prompt('New category name:')||'').trim(); if(nv){ const ex=catList().find(c=>c.key===catKey(nv)); const a=apps.find(x=>x.id===t.getAttribute('data-id')); if(a) a.category=ex?ex.name:nv; } } re=true; } saveLocal(); renderCatBar(); renderGrid(); if(re) renderEditor(); });
+document.getElementById('editor').addEventListener('click', (e)=>{ const b=e.target.closest('[data-catmove]'); if(!b) return; readInputs(); const keys=catList().map(c=>c.key); const i=keys.indexOf(b.getAttribute('data-catkey')); const j=i+Number(b.getAttribute('data-catmove')); if(i<0||j<0||j>=keys.length) return; const tmp=keys[i]; keys[i]=keys[j]; keys[j]=tmp; site.catOrder=keys; activeCategory=keys[0]; saveLocal(); renderCatBar(); renderGrid(); renderEditor(); });
+document.getElementById('saveAll').addEventListener('click', ()=>{ readInputs(); saveLocal(); renderCatBar(); renderGrid(); renderEditor(); alert('Saved! Click Download index.html to save the file, then upload it to GitHub.'); });
+document.getElementById('exportBtn').addEventListener('click', ()=>{ readInputs(); saveLocal(); const clone=document.documentElement.cloneNode(true); const cb=clone.querySelector('body'); cb.classList.remove('admin','can-edit'); cb.style.overflow=''; ['#drawer','#shade','.gear'].forEach(q=>{ const el=clone.querySelector(q); if(el) el.removeAttribute('style'); }); clone.querySelector('#demoModal').classList.remove('show'); clone.querySelector('#dPaywall').classList.remove('show'); clone.querySelector('#dFrame').setAttribute('src','about:blank'); const sc=clone.querySelector('script'); const baked='const defaultApps = [\n'+apps.map(a=>'  '+JSON.stringify(a).replace(/</g,'\\u003c')).join(',\n')+'\n]\n'; const used={}; catList().forEach(c=>{ used[c.key]=catColor(c.key); }); const bakedSite='const defaultSite = '+JSON.stringify({note:site.note||'',catColors:used,catOrder:catList().map(c=>c.key)}).replace(/</g,'\\u003c')+';\n'; sc.textContent=sc.textContent.replace(/const defaultApps = \[[\s\S]*?\n\]\n/, ()=>baked).replace(/const defaultSite = .*\n/, ()=>bakedSite); clone.querySelector('#siteNote').textContent=''; clone.querySelector('#grid').innerHTML=''; clone.querySelector('#editor').innerHTML=''; clone.querySelector('#catBar').innerHTML=''; const html='<!DOCTYPE html>\n'+clone.outerHTML; const blob=new Blob([html],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='index.html'; document.body.appendChild(a); a.click(); a.remove(); });
+const ADMIN_HASH='2571fbb21efaa6b662704d63dbe7d656fa6539f0945768c7e4e428ac27c6bd16';
+async function hashText(t){ const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+async function askPassword(){ if(document.body.classList.contains('can-edit')){ lockEditor(); return; } const pw=prompt('Enter password:'); if(pw===null) return; if(await hashText(pw)===ADMIN_HASH){ document.body.classList.add('can-edit'); try{sessionStorage.setItem('gg-unlocked','1');}catch(e){} updateGear(); openAdmin(); } else alert('Wrong password.'); }
+try{ if(sessionStorage.getItem('gg-unlocked')==='1') document.body.classList.add('can-edit'); }catch(e){}
+function lockEditor(){ closeAdmin(); document.body.classList.remove('can-edit'); try{sessionStorage.removeItem('gg-unlocked');}catch(e){} updateGear(); }
+function updateGear(){ const g=document.getElementById('lockGear'); if(!g) return; const on=document.body.classList.contains('can-edit'); g.textContent=on?'🔓':'⚙'; }
+updateGear();
+function renderCatBar(){ renderNote(); const cats=catList(); if(!cats.some(c=>c.key===activeCategory)) activeCategory=cats.length?cats[0].key:''; document.getElementById('catBar').innerHTML=cats.map(c=>{ const col=catColor(c.key); const on=activeCategory===c.key; return '<button class="cat-chip" data-cat="'+esc(c.key)+'" style="'+(on?'background:'+col+';border-color:'+col+';color:'+textOn(col):'border-color:'+col+'66;color:'+col)+'">'+esc(c.name)+' ('+c.count+')</button>'; }).join(''); }
+function renderGrid(){ const q=''; let filtered=apps.filter(a=>{ const matchCat=catKey(a.category)===activeCategory; const hay=(a.title+' '+a.desc+' '+a.category).toLowerCase(); return matchCat && (!q||hay.includes(q)); }); document.getElementById('grid').innerHTML=filtered.map(a=>{ let btn=''; if(/^\s*\$?\s*free\s*$/i.test(a.price||'')){ btn='<a class="btn buy" href="'+a.play+'" target="_blank">Open App - Free</a>'; } else { btn='<button class="btn primary" data-demo="'+a.play+'" data-buy="'+a.buy+'" data-title="'+a.title+'">Demo (1 min)</button>'+(a.buy?'<a class="btn buy" href="'+a.buy+'" target="_blank">Buy - $'+a.price+'</a>':''); } return '<div class="card"><div style="display:flex;gap:12px;align-items:center"><div class="icon" style="background:'+a.color+'22">'+a.icon+'</div><div><h3 style="margin:0">'+a.title+'</h3><div style="margin-top:4px">'+badgeHTML(a)+'</div></div></div><p style="color:#9aa3b5;font-size:.9rem;margin:4px 0">'+a.desc+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">'+btn+'</div></div>'; }).join('')||'<div style="grid-column:1/-1;text-align:center;color:#9aa3b5;padding:40px">No apps found</div>'; }
+let _t=null;
+function openDemo(url,buyUrl,title){ const m=document.getElementById('demoModal'); const fr=document.getElementById('dFrame'); const pay=document.getElementById('dPaywall'); document.getElementById('dTitle').textContent=title+' - 1 min Demo'; const b=document.getElementById('dBuyLink'); b.href=buyUrl||'#'; b.style.display=buyUrl?'inline-flex':'none'; fr.src=url; pay.classList.remove('show'); m.classList.add('show'); document.body.style.overflow='hidden'; let left=60; const t=document.getElementById('dTimer'); t.textContent='01:00'; clearInterval(_t); _t=setInterval(()=>{ left--; const mm=String(Math.floor(left/60)).padStart(2,'0'); const ss=String(left%60).padStart(2,'0'); t.textContent=mm+':'+ss; if(left<=0){ clearInterval(_t); pay.classList.add('show'); } },1000); }
+function closeDemo(){ clearInterval(_t); document.getElementById('demoModal').classList.remove('show'); document.getElementById('dFrame').src='about:blank'; document.body.style.overflow=''; }
+function replayDemo(){ document.getElementById('dPaywall').classList.remove('show'); const f=document.getElementById('dFrame'); f.src=f.src; let left=60; const t=document.getElementById('dTimer'); t.textContent='01:00'; clearInterval(_t); _t=setInterval(()=>{ left--; const mm=String(Math.floor(left/60)).padStart(2,'0'); const ss=String(left%60).padStart(2,'0'); t.textContent=mm+':'+ss; if(left<=0){ clearInterval(_t); document.getElementById('dPaywall').classList.add('show'); } },1000); }
+document.addEventListener('click', e=>{ const c=e.target.closest('[data-cat]'); if(c){ setCategory(c.getAttribute('data-cat')); return; } const b=e.target.closest('[data-demo]'); if(b) openDemo(b.getAttribute('data-demo'), b.getAttribute('data-buy'), b.getAttribute('data-title')); });
+renderCatBar(); renderGrid();
+</script>
+<script>
+  // Load saved edits (discarded if this file's built-in apps have changed)
+  try{
+    var _s = localStorage.getItem('gg-all-fields-v3');
+    if(_s){
+      var _p = JSON.parse(_s);
+      if(_p && _p.base && _p.base !== JSON.stringify(defaultApps)+JSON.stringify(defaultSite)){ localStorage.removeItem('gg-all-fields-v3'); location.reload(); }
+      else if(_p && Array.isArray(_p.apps)){ apps = _p.apps; if(_p.site) site = Object.assign({note:'',catColors:{}}, _p.site); renderCatBar(); renderGrid(); }
+    }
+  }catch(e){}
+// --- FIXED EDITOR OVERRIDE - ensures lock works for customers, editor works for you ---
+(function(){
+  // Force locked by default unless session says unlocked
+  try{
+    if(sessionStorage.getItem('gg-unlocked')!=='1'){
+      document.body.classList.remove('can-edit');
+      document.body.classList.remove('admin');
+    }
+  }catch(e){}
+  function updateLockUI(){
+    var g=document.getElementById('lockGear');
+    if(!g) return;
+    var on=document.body.classList.contains('can-edit');
+    g.textContent = on ? '🔓' : '⚙';
+    g.title = on ? 'Lock editor - click to lock' : 'Unlock editor';
+    // Show/hide gear button explicitly (not just CSS)
+    var gear=document.querySelector('.gear');
+    if(gear) gear.style.display = on ? 'inline-block' : 'none';
+  }
+  window._updateLockUI = updateLockUI;
+  // Override openAdmin to always work when unlocked
+  window.openAdmin = function(){
+    if(!document.body.classList.contains('can-edit')){ alert('Click the lock at the bottom and enter your password first.'); return; }
+    document.body.classList.add('admin');
+    try{ renderEditor(); }catch(e){}
+    var d=document.getElementById('drawer'); if(d) d.style.transform='none';
+    var s=document.getElementById('shade'); if(s) s.style.display='block';
+  };
+  window.closeAdmin = function(){
+    try{ if(document.body.classList.contains('admin') && document.querySelector('#editor [data-field]')){ readInputs(); saveLocal(); renderCatBar(); renderGrid(); } }catch(e){}
+    document.body.classList.remove('admin');
+    var d=document.getElementById('drawer'); if(d) d.style.transform='translateX(100%)';
+    var s=document.getElementById('shade'); if(s) s.style.display='none';
+  };
+  window.lockEditor = function(){
+    window.closeAdmin();
+    document.body.classList.remove('can-edit');
+    try{ sessionStorage.removeItem('gg-unlocked'); }catch(e){}
+    updateLockUI();
+  };
+  // Re-bind lockGear click to fixed askPassword
+  var lg=document.getElementById('lockGear');
+  if(lg){
+    lg.onclick = async function(){
+      if(document.body.classList.contains('can-edit')){ window.lockEditor(); return; }
+      var pw=prompt('Enter password:'); if(pw===null) return;
+      try{
+        var d=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+        var h=[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');
+        if(h==='2571fbb21efaa6b662704d63dbe7d656fa6539f0945768c7e4e428ac27c6bd16'){
+          document.body.classList.add('can-edit');
+          try{ sessionStorage.setItem('gg-unlocked','1'); }catch(e){}
+          updateLockUI();
+          alert('Unlocked! Now click the yellow Edit button at the top.');
+        } else alert('Wrong password.');
+      }catch(e){ alert('Could not check password: '+e.message); }
+    };
+  }
+  updateLockUI();
+  // If already unlocked from session, show gear
+  if(document.body.classList.contains('can-edit')) updateLockUI();
+})();
+</script>
+<script>
+// --- VISITOR COUNTER (does not count the owner) ---
+// A browser is marked as "owner" the first time the editor is unlocked with the password.
+// Owner browsers are never counted. The numbers only show at the bottom of the page while the editor is unlocked.
+(function(){
+  var API='https://abacus.jasoncameron.dev', NS='gamacheapps-site', K_VISITS='games-visits', K_UNIQUE='games-visitors';
+  var box=document.getElementById('visitStats');
+  if(box){ box.textContent=''; box.style.display='none'; }
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+  function isOwner(){ return ls('gg-owner')==='1'; }
+  function unlocked(){ return document.body.classList.contains('can-edit'); }
+  function call(kind,key){ return fetch(API+'/'+kind+'/'+NS+'/'+key).then(function(r){ return r.ok?r.json():{value:0}; }).then(function(d){ return (d&&typeof d.value==='number')?d.value:0; }).catch(function(){ return null; }); }
+  function showStats(){
+    if(!box) return;
+    if(!unlocked()){ box.style.display='none'; return; }
+    box.style.display='block'; box.textContent='Visitors: loading...';
+    Promise.all([call('get',K_UNIQUE),call('get',K_VISITS)]).then(function(v){
+      if(!unlocked()) return;
+      box.textContent=(v[0]===null||v[1]===null)?'Visitors: could not load the count right now':'👥 Visitors: '+v[0]+'   •   Visits: '+v[1]+'   (you are not counted)';
+    });
+  }
+  function check(){ if(unlocked()) ls('gg-owner','1'); showStats(); }
+  if(unlocked()) ls('gg-owner','1');
+  if(!isOwner()){
+    var today=new Date().toISOString().slice(0,10);
+    if(ls('gg-games-visit-day')!==today){ ls('gg-games-visit-day',today); call('hit',K_VISITS); }
+    if(ls('gg-games-visit-first')!=='1'){ ls('gg-games-visit-first','1'); call('hit',K_UNIQUE); }
+  }
+  new MutationObserver(check).observe(document.body,{attributes:true,attributeFilter:['class']});
+  var last=unlocked(); showStats();
+})();
+</script>
+</body></html>
