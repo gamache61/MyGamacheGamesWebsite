@@ -1,0 +1,1 @@
+SF3D WebGPU by lyonsno, a browser port of Stability AI Stable Fast 3D. Powered by Stability AI. Model weights are loaded from huggingface.co/BasinShapers/sf3d-webgpu-weights under the Stability AI Community License (free under US$1M annual revenue).
