@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MyOffRoadGames</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;height:100%;background:#1b1f24;color:#fff;font-family:Arial,Helvetica,sans-serif}
+#menu{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:30px 16px;box-sizing:border-box;background:linear-gradient(#2a3440,#14181d)}
+h1{font-size:46px;margin:0 0 6px;letter-spacing:1px}
+.sub{opacity:.7;margin:0 0 26px;font-size:18px}
+#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;width:min(1000px,100%)}
+.card{background:#262d36;border:2px solid transparent;border-radius:14px;padding:22px;cursor:pointer;transition:.15s}
+.card:hover{border-color:#e8501f;transform:translateY(-3px);background:#2d3641}
+.card h2{margin:0 0 8px;font-size:26px}
+.card p{margin:0;opacity:.8;font-size:16px;line-height:1.4}
+.tag{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e8501f}
+#frame{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:#000}
+#back{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:10;display:none;font-size:15px;font-weight:700;padding:8px 18px;border:0;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;opacity:.55}
+#back:hover{opacity:1}
+</style>
+</head>
+<body>
+<div id="menu">
+<h1>MyOffRoadGames</h1>
+<p class="sub">Pick a game</p>
+<div id="grid"></div>
+</div>
+<iframe id="frame" allow="autoplay; fullscreen"></iframe>
+<button id="back">&larr; Menu</button>
+<script>
+const GAMES=[
+{f:'BajaRace.html',n:'Baja Race',d:'Desert off-road race against rival trucks.',t:'RACE'},
+{f:'SpeedBoatRace.html',n:'Speed Boat Race',d:'10 mile lake course, follow the pylons.',t:'RACE'},
+{f:'MudRace.html',n:'4x4 Mud Race and Hill Climb',d:'Mud bogs, steep hills and a huge final climb to the summit.',t:'RACE'},
+{f:'RockClimb.html',n:'Rock Climb',d:'A huge, steep hill made of big rocks. Climb to the summit.',t:'CLIMB'},
+{f:'ClimbAll.html',n:'ClimbAll',d:'A gravel pit with wrecked cars. Drive over them to the far end.',t:'CLIMB'},
+{f:'SnowMountain.html',n:'Snow Mountain',d:'Arctic 6x6 snow machine climbing a snow mountain.',t:'CLIMB'}
+];
+const grid=document.getElementById('grid'),menu=document.getElementById('menu'),fr=document.getElementById('frame'),back=document.getElementById('back');
+GAMES.forEach(g=>{const c=document.createElement('div');c.className='card';c.innerHTML='<h2>'+g.n+'</h2><p>'+g.d+'</p><span class="tag">'+g.t+'</span>';c.onclick=()=>openGame(g);grid.appendChild(c);});
+function openGame(g){menu.style.display='none';fr.style.display='block';back.style.display='block';fr.onload=()=>{try{fr.contentWindow.focus();}catch(e){}};fr.src=g.f;document.title=g.n;}
+function closeGame(){fr.src='about:blank';fr.style.display='none';back.style.display='none';menu.style.display='flex';document.title='MyOffRoadGames';}
+back.onclick=closeGame;
+</script>
+</body>
+</html>
